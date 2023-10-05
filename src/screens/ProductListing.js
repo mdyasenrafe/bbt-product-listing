@@ -7,6 +7,7 @@ import { Typography } from "../theme/Typography";
 import VehicleList from "../components/VehicleList";
 import Skeleton from "../components/Skeleton";
 import { globalStyles } from "../styles/globalStyle";
+import SkeletonContainer from "../components/SkeletonContainer";
 
 export default function ProductListing() {
   const [page, setPage] = useState(1);
@@ -53,66 +54,27 @@ export default function ProductListing() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading && page === 1 ? (
-        <View style={styles.loadingContainer}>
-          {Array.from(Array(12).keys()).map((item, index) => {
-            return (
-              <View style={globalStyles.card} key={index}>
-                <Skeleton width={150} height={150} style={globalStyles.image} />
-                <Skeleton
-                  width={100}
-                  height={20}
-                  style={{
-                    marginTop: 8,
-                  }}
-                />
-              </View>
-            );
-          })}
-        </View>
-      ) : (
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>Our Products</Text>
-          <FlatList
-            data={vehicleData}
-            renderItem={({ item }) => <VehicleList item={item} />}
-            keyExtractor={(item) => item.id}
-            onEndReached={handleLoadMore}
-            onEndReachedThreshold={0.1}
-            numColumns={2}
-            columnWrapperStyle={styles.columnWrapper}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-            ListFooterComponent={() => (
-              <View
-                style={[
-                  styles.loadingContainer,
-                  {
-                    paddingHorizontal: 0,
-                  },
-                ]}
-              >
-                {Array.from(Array(2).keys()).map((item, index) => (
-                  <View style={globalStyles.card} key={index}>
-                    <Skeleton
-                      width={150}
-                      height={150}
-                      style={globalStyles.image}
-                    />
-                    <Skeleton
-                      width={100}
-                      height={20}
-                      style={{
-                        marginTop: 8,
-                      }}
-                    />
-                  </View>
-                ))}
-              </View>
-            )}
-          />
-        </View>
-      )}
+      <View style={styles.contentContainer}>
+        {loading && page === 1 ? (
+          <SkeletonContainer number={12} />
+        ) : (
+          <>
+            <Text style={styles.title}>Our Products</Text>
+            <FlatList
+              data={vehicleData}
+              renderItem={({ item }) => <VehicleList item={item} />}
+              keyExtractor={(item) => item.id}
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.1}
+              numColumns={2}
+              columnWrapperStyle={styles.columnWrapper}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+              ListFooterComponent={() => <SkeletonContainer number={2} />}
+            />
+          </>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
@@ -122,14 +84,9 @@ const styles = {
     backgroundColor: "#fff",
     flex: 1,
   },
-  loadingContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-  },
   contentContainer: {
     paddingHorizontal: 24,
+    paddingTop: 40,
   },
   title: {
     fontSize: 18,
@@ -141,10 +98,5 @@ const styles = {
   },
   listContent: {
     paddingBottom: 40,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
   },
 };
