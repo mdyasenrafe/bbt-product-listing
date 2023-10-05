@@ -1,45 +1,20 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image } from "react-native";
 import React from "react";
-import { Typography } from "../theme/Typography";
+import { globalStyles } from "../styles/globalStyle";
 
 export default function VehicleList({ item }) {
   return (
-    <View style={styles.card}>
+    <View style={[globalStyles.card]}>
       <Image
         source={{ uri: item.media.image.thumbnail_url }}
-        style={styles.image}
+        style={globalStyles.image}
       />
-      <Text
-        style={{
-          fontSize: 14,
-          fontFamily: Typography.regular,
-          marginBottom: 8,
-          color: "#000",
-        }}
-      >
+      <Text style={globalStyles.title}>
         {item.naming.make} {item.naming.model}
+      </Text>
+      <Text style={globalStyles.description}>
+        Version: {item.naming.chargetrip_version}
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  image: {
-    height: 145,
-    width: "100%",
-    borderRadius: 8,
-    resizeMode: "contain",
-  },
-  card: {
-    width: "48%",
-    marginBottom: 24,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    shadowColor: "#171717",
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 1,
-    marginBottom: 24,
-  },
-});

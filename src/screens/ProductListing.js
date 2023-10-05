@@ -5,49 +5,47 @@ import { GET_VEHICLE_LIST } from "../query/query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Typography } from "../theme/Typography";
 import VehicleList from "../components/VehicleList";
-
-// Component for the loading indicator
-const LoadingIndicator = ({ loading }) => {
-  return (
-    <View>
-      {loading ? <ActivityIndicator color="#F40B0B" size="small" /> : null}
-    </View>
-  );
-};
+import Skeleton from "../components/Skeleton";
+import { globalStyles } from "../styles/globalStyle";
 
 export default function ProductListing() {
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [vehicleList, setVehicleList] = useState([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [vehicleData, setVehicleData] = useState([]);
 
   // Fetch vehicle list data using Apollo Client
   const { loading, data, fetchMore } = useQuery(GET_VEHICLE_LIST, {
     variables: { page: page, size: 12 },
-    onCompleted: (data) => {
-      if (page > 1) {
-        const newData = data.vehicleList.filter(
-          (item) => !vehicleList.some((other) => item.id === other.id)
-        );
-        setVehicleList([...vehicleList, ...newData]);
+    onCompleted: (newData) => {
+      if (page === 1) {
+        setVehicleData(newData.vehicleList);
       } else {
-        setVehicleList(data.vehicleList);
+        const updatedData = newData.vehicleList.filter(
+          (newItem) =>
+            !vehicleData.some((existingItem) => newItem.id === existingItem.id)
+        );
+        setVehicleData([...vehicleData, ...updatedData]);
       }
     },
   });
 
   const handleLoadMore = () => {
-    if (!isLoading) {
-      setIsLoading(true);
+    if (!isLoadingMore) {
+      setIsLoadingMore(true);
       fetchMore({
         variables: { page: page + 1, size: 10 },
-        updateQuery: (prev, { fetchMoreResult }) => {
-          if (!fetchMoreResult) return prev;
-          setIsLoading(false);
+        updateQuery: (prevData, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prevData;
+          setIsLoadingMore(false);
           setPage(page + 1);
 
-          return Object.assign({}, prev, {
-            vehicleList: [...prev.vehicleList, ...fetchMoreResult.vehicleList],
-          });
+          return {
+            ...prevData,
+            vehicleList: [
+              ...prevData.vehicleList,
+              ...fetchMoreResult.vehicleList,
+            ],
+          };
         },
       });
     }
@@ -55,15 +53,28 @@ export default function ProductListing() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading && page == 1 ? (
+      {loading && page === 1 ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator color="#F40B0B" size="large" />
+          {Array.from(Array(12).keys()).map((item, index) => {
+            return (
+              <View style={globalStyles.card} key={index}>
+                <Skeleton width={150} height={150} style={globalStyles.image} />
+                <Skeleton
+                  width={100}
+                  height={20}
+                  style={{
+                    marginTop: 8,
+                  }}
+                />
+              </View>
+            );
+          })}
         </View>
       ) : (
         <View style={styles.contentContainer}>
           <Text style={styles.title}>Our Products</Text>
           <FlatList
-            data={vehicleList}
+            data={vehicleData}
             renderItem={({ item }) => <VehicleList item={item} />}
             keyExtractor={(item) => item.id}
             onEndReached={handleLoadMore}
@@ -73,8 +84,30 @@ export default function ProductListing() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
             ListFooterComponent={() => (
-              <View style={{ marginBottom: 40 }}>
-                <ActivityIndicator loading={isLoading} />
+              <View
+                style={[
+                  styles.loadingContainer,
+                  {
+                    paddingHorizontal: 0,
+                  },
+                ]}
+              >
+                {Array.from(Array(2).keys()).map((item, index) => (
+                  <View style={globalStyles.card} key={index}>
+                    <Skeleton
+                      width={150}
+                      height={150}
+                      style={globalStyles.image}
+                    />
+                    <Skeleton
+                      width={100}
+                      height={20}
+                      style={{
+                        marginTop: 8,
+                      }}
+                    />
+                  </View>
+                ))}
               </View>
             )}
           />
@@ -90,9 +123,10 @@ const styles = {
     flex: 1,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
   },
   contentContainer: {
     paddingHorizontal: 24,
@@ -107,5 +141,10 @@ const styles = {
   },
   listContent: {
     paddingBottom: 40,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
   },
 };
