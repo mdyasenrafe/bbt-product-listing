@@ -16,7 +16,7 @@ export default function ProductListing() {
 
   // Fetch vehicle list data using Apollo Client
   const { loading, data, fetchMore } = useQuery(GET_VEHICLE_LIST, {
-    variables: { page: page, size: 12 },
+    variables: { page: page, size: 14 },
     onCompleted: (newData) => {
       if (page === 1) {
         setVehicleData(newData.vehicleList);
@@ -56,7 +56,7 @@ export default function ProductListing() {
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
         {loading && page === 1 ? (
-          <SkeletonContainer number={12} />
+          <SkeletonContainer number={14} />
         ) : (
           <>
             <Text style={styles.title}>Our Products</Text>
