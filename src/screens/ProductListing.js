@@ -24,7 +24,6 @@ export default function ProductListing() {
   const { loading, data, fetchMore } = useQuery(GET_VEHICLE_LIST, {
     variables: { page: page, size: 12 },
     onCompleted: (data) => {
-      //  check duplicate data
       if (page > 1) {
         const newData = data.vehicleList.filter(
           (item) => !vehicleList.some((other) => item.id === other.id)
@@ -37,31 +36,22 @@ export default function ProductListing() {
   });
 
   const handleLoadMore = () => {
-    if (!loading) {
-      if (!isLoading) {
-        setIsLoading(true);
-        fetchMore({
-          variables: { page: page + 1, size: 10 },
-          updateQuery: (prev, { fetchMoreResult }) => {
-            if (!fetchMoreResult) return prev;
-            setIsLoading(false);
-            setPage(page + 1);
+    if (!isLoading) {
+      setIsLoading(true);
+      fetchMore({
+        variables: { page: page + 1, size: 10 },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          if (!fetchMoreResult) return prev;
+          setIsLoading(false);
+          setPage(page + 1);
 
-            return Object.assign({}, prev, {
-              vehicleList: [
-                ...prev.vehicleList,
-                ...fetchMoreResult.vehicleList,
-              ],
-            });
-          },
-        });
-      }
+          return Object.assign({}, prev, {
+            vehicleList: [...prev.vehicleList, ...fetchMoreResult.vehicleList],
+          });
+        },
+      });
     }
   };
-
-  useEffect(() => {
-    console.log("length", vehicleList.length);
-  }, [vehicleList]);
 
   return (
     <SafeAreaView style={styles.container}>
